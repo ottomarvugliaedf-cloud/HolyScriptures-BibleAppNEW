@@ -1,4 +1,4 @@
-name: HolyScriptures APK No Icons
+name: Simple APK Build
 
 on:
   push:
@@ -11,37 +11,23 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     
-    - uses: actions/setup-node@v4
+    - name: Setup JDK
+      uses: actions/setup-java@v4
       with:
-        node-version: '20'
-    
-    - name: Install
-      run: npm install --legacy-peer-deps
-      
-    - name: Create fake icon
-      run: |
-        mkdir -p assets/images
-        echo "Icon placeholder" > assets/images/icon.png
-        
-    - name: Manual bundle
-      run: |
-        mkdir -p android/app/src/main/assets
-        echo "module.exports = {}; " > index.js  # Placeholder se manca
-        npx react-native bundle --platform android --dev false --entry-file index.js --bundle-output android/app/src/main/assets/index.android.bundle
-        
-    - uses: actions/setup-java@v4
-      with:
-        distribution: 'temurin'
         java-version: '17'
+        distribution: 'temurin'
     
-    - uses: android-actions/setup-android@v3
-      
-    - name: Build
+    - name: Setup Android SDK
+      uses: android-actions/setup-android@v3
+    
+    - name: Build APK
       run: |
         cd android
-        ./gradlew assembleDebug
+        chmod +x gradlew
+        ./gradlew assembleRelease
         
-    - uses: actions/upload-artifact@v4
+    - name: Upload APK
+      uses: actions/upload-artifact@v4
       with:
-        name: Bible-APK-Working.apk
-        path: android/app/build/outputs/apk/debug/app-debug.apk
+        name: HolyScriptures.apk
+        path: android/app/build/outputs/apk/release/app-release-unsigned.apk
