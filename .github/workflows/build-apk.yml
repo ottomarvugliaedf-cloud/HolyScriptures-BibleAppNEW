@@ -1,4 +1,4 @@
-name: Build HolyScriptures APK
+name: Build HolyScriptures APK (Fixed)
 
 on:
   push:
@@ -15,22 +15,23 @@ jobs:
       uses: actions/setup-node@v4
       with:
         node-version: '20'
-        cache: 'npm'
     
-    # Fix lockfile + install
-    - name: Fix dependencies
+    - name: Install deps
       run: |
-        rm -f package-lock.json  # Rimuovi lock desync
+        rm -f package-lock.json
         npm install --legacy-peer-deps
         
-    - name: Setup Java
+    - name: Create assets dir & bundle JS
+      run: |
+        mkdir -p android/app/src/main/assets
+        npx react-native bundle --platform android --dev false --entry-file index.js --bundle-output android/app/src/main/assets/index.android.bundle --assets-dest android/app/src/main/res
+        
+    - name: Setup Java & Android
       uses: actions/setup-java@v4
       with:
         distribution: 'temurin'
         java-version: '17'
-    
-    - name: Setup Android SDK
-      uses: android-actions/setup-android@v3
+    - uses: android-actions/setup-android@v3
       
     - name: Build APK
       run: |
@@ -41,6 +42,5 @@ jobs:
     - name: Upload APK
       uses: actions/upload-artifact@v4
       with:
-        name: HolyScriptures-BibleApp.apk
+        name: HolyScriptures-FIXED.apk
         path: android/app/build/outputs/apk/debug/app-debug.apk
-        retention-days: 30
