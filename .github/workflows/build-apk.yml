@@ -1,4 +1,4 @@
-name: HolyScriptures APK SUCCESS
+name: Bible APK - Working
 
 on:
   push:
@@ -15,28 +15,29 @@ jobs:
       with:
         node-version: '20'
     
-    - name: Install
+    - name: Install Expo CLI
+      run: npm install -g @expo/cli --legacy-peer-deps
+      
+    - name: Install deps
       run: npm install --legacy-peer-deps
       
-    - name: Expo prebuild & bundle
-      run: |
-        npx expo install --fix
-        mkdir -p android/app/src/main/assets
-        npx expo export --platform android --dev
-        
-    - uses: actions/setup-java@v4
+    - name: Expo prebuild
+      run: npx expo prebuild --platform android --clean
+      
+    - name: Setup Java/Android
+      uses: actions/setup-java@v4
       with:
         distribution: 'temurin'
         java-version: '17'
-    
     - uses: android-actions/setup-android@v3
       
-    - name: Build APK
+    - name: Bundle & Build
       run: |
         cd android
-        ./gradlew assembleDebug
+        ./gradlew assembleRelease  # Release per bundle incluso
         
-    - uses: actions/upload-artifact@v4
+    - name: Upload
+      uses: actions/upload-artifact@v4
       with:
-        name: BibleApp-APK-Ready.apk
-        path: android/app/build/outputs/apk/debug/app-debug.apk
+        name: HolyScriptures-APK-Final.apk
+        path: android/app/build/outputs/apk/release/app-release-unsigned.apk
